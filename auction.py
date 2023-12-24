@@ -8,20 +8,22 @@
 from random import shuffle
 
 
-def get_money():
-    return [2, 3, 4, 5, 6, 7, 8, 9, 10]
+money_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 class Player:
     current_artifact = None
 
-    def __init__(self, _name):
+    def __init__(self, _name='DEFAULT NAME'):
         self.name = _name
-        self.money = get_money()
+        self.money = money_list[:] # assign a copy of the list, NOT a reference, to self.money using [:]
         self.artifacts_won = []
         self.score = 0.0
         self.bid = 0
         self.bids = []
+    
+    def set_name(self, _name):
+        self.name = _name[:16] # limit name to 16 characters
 
     def add_artifact(self, artifact):
         self.artifacts_won.append(artifact)
@@ -39,14 +41,12 @@ class Player:
             print('You don\'t have that money. Choose something else.')
             self.bids.remove(_bid) # make sure that incorrect bids don't get added back to player's money later.
             self.bid_in_auction(None)
-    
 
     def get_total_money(self):
         total = 0
         for cash in self.money:
             total += cash
         return total
-    
 
     def leftovers(self):
         # add leftover money to this player's score to settle ties
@@ -87,7 +87,7 @@ def tie_helper(things):
 
 
 def play(players):
-    p_one, p_two, p_three = players
+    p_one, p_two, p_three = players # just use a list of players and reference them using the index??? why didn't I do that?
     game_artifacts = get_artifacts()
 
 

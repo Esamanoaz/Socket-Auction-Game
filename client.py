@@ -23,18 +23,18 @@ def send(_msg):
     print(client.recv(12).decode(FORMAT))
 
 if __name__ == '__main__':
-    setup = input('[SETUP] Default setup? (y/n): ')
-    if setup.lower() == 'n':
-        IP = int(input('[IP]: '))
-        PORT = int(input('[PORT]: '))
-    else:
-        IP = gethostbyname(gethostname())
-        PORT = 25000
-        print(f'[SETUP] Set up by default to {IP}:{PORT}')
+    print(f'[INFO] Local IP is {gethostname()} and default port should be 25000\n')
+    IP = input('[IP]: ')
+    PORT = int(input('[PORT]: '))
+    name = input('[DISPLAY NAME]: ')[:16] # limit length to 16 characters
+    print(f'[SETUP] Connecting to {IP}:{PORT}')
     
     ADDR = (IP, PORT)
     client = socket(AF_INET, SOCK_STREAM)
     client.connect(ADDR)
+
+    # send display name first:
+    send(name)
 
     while connected := True:
         msg = input('[ENTER MSG]: ')

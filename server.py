@@ -15,6 +15,7 @@ from auction import play, Player
 from socket import *
 from threading import Thread, active_count, Lock
 
+# server setup stuff
 HEADER = 4
 PORT = 25000
 IP = gethostbyname(gethostname())
@@ -34,8 +35,10 @@ def safe_print(*a, **b):
         print(*a, **b)
 
 
-def handle_client(conn, addr):
+def handle_client(conn, addr, players):
     print(f'[NEW CONNECTION] {addr} connected.')
+
+    
 
     connected = True
     while connected:
@@ -52,13 +55,22 @@ def handle_client(conn, addr):
 
 
 def start():
+    players = []
+
     sock.listen()
     print(f'Server is listening on {IP}:{PORT}')
     while True:
         conn, addr = sock.accept()
-        thread = Thread(target=handle_client, args=(conn, addr))
+        thread = Thread(target=handle_client, args=(conn, addr, players))
         thread.start()
-        print(f'[ACTIVE CONNECTIONS] {active_count() - 1}')
+        num_connections = active_count() - 1
+        print(f'[ACTIVE CONNECTIONS] {num_connections}')
+
+        if num_connections > 2: # if 3+ connections:
+            break
+    
+    begin_game() # start playing Auction
+
 
 if __name__ == '__main__':
     IP = gethostbyname(gethostname())
