@@ -8,9 +8,12 @@
 from socket import *
 #from threading import Thread
 
+# server setup stuff
 HEADER = 4
 FORMAT = 'utf-8'
 DISCONN_MSG = '!DISCONNECT'
+NAME_MSG = '!NAME '
+
 
 def send(_msg):
     # note: the purpose of the header is to indicate how long the following msg will be
@@ -23,7 +26,7 @@ def send(_msg):
     print(client.recv(12).decode(FORMAT))
 
 if __name__ == '__main__':
-    print(f'[INFO] Local IP is {gethostname()} and default port should be 25000\n')
+    print(f'[INFO] Local IP is {gethostbyname(gethostname())} \n       Default port should be 25000\n')
     IP = input('[IP]: ')
     PORT = int(input('[PORT]: '))
     name = input('[DISPLAY NAME]: ')[:16] # limit length to 16 characters
@@ -34,7 +37,7 @@ if __name__ == '__main__':
     client.connect(ADDR)
 
     # send display name first:
-    send(name)
+    send(NAME_MSG + name)
 
     while connected := True:
         msg = input('[ENTER MSG]: ')

@@ -40,7 +40,7 @@ class Player:
         except:
             print('You don\'t have that money. Choose something else.')
             self.bids.remove(_bid) # make sure that incorrect bids don't get added back to player's money later.
-            self.bid_in_auction(None)
+            self.bid_in_auction(None) # TODO: might need to remove this line for the networked version
 
     def get_total_money(self):
         total = 0
@@ -109,7 +109,7 @@ def play(players):
             return bid_match(sel_players, th_result)
         elif type(th_result) is bool:
             remaining_players = []
-            if p_one.bid > p_two.bid:
+            if p_one.bid > p_two.bid:               # TODO: just reference using players[index]. How does this black magic even work with explicit references to p1/2/3?????!?!?!?
                 remaining_players.append(p_one)
                 remaining_players.append(p_three)
             elif p_two.bid > p_one.bid:

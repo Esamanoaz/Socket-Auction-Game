@@ -22,6 +22,7 @@ IP = gethostbyname(gethostname())
 ADDR = (IP, PORT)
 FORMAT = 'utf-8'
 DISCONN_MSG = '!DISCONNECT'
+NAME_MSG = '!NAME '
 LOCK = Lock()
 
 sock = socket(AF_INET, SOCK_STREAM)
@@ -36,22 +37,39 @@ def safe_print(*a, **b):
 
 
 def handle_client(conn, addr, players):
-    print(f'[NEW CONNECTION] {addr} connected.')
+    '''
+    Create a Player object for the client using the name msg they will send (wait for this msg).
 
-    
+    '''
+    safe_print(f'[NEW CONNECTION] {addr} connected.')
 
+    name = ''
+    my_player = None
+    should_append_player = True
     connected = True
-    while connected:
+    running = True
+    while running:
         if msg_len := conn.recv(HEADER).decode(FORMAT): # if we receive a msg
             msg_len = int(msg_len) # then store the header (first msg) as the length of the next msg
             msg = conn.recv(msg_len).decode(FORMAT) # then listen for the body (second msg) since we know its length
             if msg == DISCONN_MSG:
+                running = False
                 connected = False
+                conn.close()
+                break
+            elif NAME_MSG in msg:
+                if name != '': # if the name has already been changed, do not append a new player
+                    should_append_player = False
+                name = msg[len(NAME_MSG):]
+                if should_append_player:
+                    my_player = Player(name)
+                    players.append(my_player)
             
-            safe_print(f'[{addr}] {msg}')
+            safe_print(f'[{addr}, {name}] {msg}')
             conn.send('MSG received'.encode(FORMAT))
     
-    conn.close()
+    if connected:
+        #play_client(conn, addr, my_player)
 
 
 def start():
@@ -64,12 +82,22 @@ def start():
         thread = Thread(target=handle_client, args=(conn, addr, players))
         thread.start()
         num_connections = active_count() - 1
-        print(f'[ACTIVE CONNECTIONS] {num_connections}')
+        safe_print(f'[ACTIVE CONNECTIONS] {num_connections}')
 
         if num_connections > 2: # if 3+ connections:
             break
     
-    begin_game() # start playing Auction
+    input('\nPress ENTER to begin when ready :)')
+    begin_game(players) # start playing Auction
+
+    # TODO: List of conn and addr tuples
+    #       Handle the running of the game in one function, say, 'start()'
+    #       Then await the bids from each client,
+    #       when all clients send a bid msg, then move forward with the game
+
+
+def begin_game(players):
+    play(players)
 
 
 if __name__ == '__main__':
