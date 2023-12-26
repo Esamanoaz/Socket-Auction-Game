@@ -87,11 +87,30 @@ def tie_helper(things):
 
 
 def play(players):
-    p_one, p_two, p_three = players # just use a list of players and reference them using the index??? why didn't I do that?
     game_artifacts = get_artifacts()
 
 
-    def bidding_round(sel_players): # sel_players -> selected players. Just wanted/needed something different
+    def determine_who_tied(remaining_players, sel_players):
+        print('[CHECK] Does rem and sel equal? ' + str((remaining_players == sel_players))) #TODO: the second iteration of this function starts without rem and sel being equal. Not good.
+        for i, p in enumerate(sel_players, 0):
+            print(i,p.name)
+            print(i == len(sel_players) - 1)
+            if i == len(sel_players) - 1: # if we are at the final player
+                first_player = sel_players[0]
+                if p.bid > first_player.bid:
+                    remaining_players.remove(first_player)
+                    sel_players = remaining_players[:]
+                    return False
+            else:
+                next_player = sel_players[i + 1]
+                if p.bid > next_player.bid:
+                    remaining_players.remove(next_player)
+                    sel_players = remaining_players[:]
+                    return False
+        return True # if we checked all the players through without removing any, then return True and end recursion :)
+
+
+    def bidding_round(sel_players): # sel_players -> selected players (the players who will be bidding).
         '''
         Handles players bidding on an artifact.
         Recursively calls itself again if there is a tie in the bidding.
@@ -105,11 +124,17 @@ def play(players):
 
         # determine the winner
         th_result = tie_helper(bids)
-        if type(th_result) is int:
+        if type(th_result) is int: # there is no tie, and there is a winner
             return bid_match(sel_players, th_result)
-        elif type(th_result) is bool:
-            remaining_players = []
-            if p_one.bid > p_two.bid:               # TODO: just reference using players[index]. How does this black magic even work with explicit references to p1/2/3?????!?!?!?
+        elif type(th_result) is bool: # there is a tie, and we now must determine who is tied to the highest bid
+            remaining_players = sel_players[:]
+            all_checked = False # have we succesfully checked that all remaining players are tied?
+            while not all_checked:
+                all_checked = determine_who_tied(remaining_players, sel_players)
+            for p in remaining_players: print(p.name)
+
+            '''
+            if p_one.bid > p_two.bid:
                 remaining_players.append(p_one)
                 remaining_players.append(p_three)
             elif p_two.bid > p_one.bid:
@@ -119,7 +144,7 @@ def play(players):
                 remaining_players.append(p_one)
                 remaining_players.append(p_two)
             else:
-                remaining_players = sel_players
+                remaining_players = sel_players'''
             # do another round of bidding with the remaining players
             return bidding_round(remaining_players)
         else:
@@ -161,6 +186,6 @@ def play(players):
 
 
 if __name__ == '__main__':
-    players = [Player('X'), Player('Gamer'), Player('Evan')]
+    players = [Player('X'), Player('Gamer'), Player('Evan'), Player('Four'), Player('Five')]
     the_winner_yippee = play(players)
     print(f'The winner of the game is {the_winner_yippee.name}! \nYippee!')
