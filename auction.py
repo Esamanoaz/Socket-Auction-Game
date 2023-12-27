@@ -91,23 +91,18 @@ def play(players):
 
 
     def determine_who_tied(remaining_players, sel_players):
-        print('[CHECK] Does rem and sel equal? ' + str((remaining_players == sel_players))) #TODO: the second iteration of this function starts without rem and sel being equal. Not good.
         for i, p in enumerate(sel_players, 0):
-            print(i,p.name)
-            print(i == len(sel_players) - 1)
             if i == len(sel_players) - 1: # if we are at the final player
                 first_player = sel_players[0]
                 if p.bid > first_player.bid:
                     remaining_players.remove(first_player)
-                    sel_players = remaining_players[:]
-                    return False
+                    return (False, remaining_players[:]) # we return rem_players in order to assign rem_players to sel_players on the outside
             else:
                 next_player = sel_players[i + 1]
                 if p.bid > next_player.bid:
                     remaining_players.remove(next_player)
-                    sel_players = remaining_players[:]
-                    return False
-        return True # if we checked all the players through without removing any, then return True and end recursion :)
+                    return (False, remaining_players[:])
+        return (True, remaining_players[:]) # if we checked all the players through without removing any, then return True and end recursion :)
 
 
     def bidding_round(sel_players): # sel_players -> selected players (the players who will be bidding).
@@ -130,21 +125,8 @@ def play(players):
             remaining_players = sel_players[:]
             all_checked = False # have we succesfully checked that all remaining players are tied?
             while not all_checked:
-                all_checked = determine_who_tied(remaining_players, sel_players)
-            for p in remaining_players: print(p.name)
-
-            '''
-            if p_one.bid > p_two.bid:
-                remaining_players.append(p_one)
-                remaining_players.append(p_three)
-            elif p_two.bid > p_one.bid:
-                remaining_players.append(p_two)
-                remaining_players.append(p_three)
-            elif p_two.bid > p_three.bid:
-                remaining_players.append(p_one)
-                remaining_players.append(p_two)
-            else:
-                remaining_players = sel_players'''
+                all_checked, temp_players = determine_who_tied(remaining_players, sel_players)
+                sel_players = temp_players
             # do another round of bidding with the remaining players
             return bidding_round(remaining_players)
         else:
